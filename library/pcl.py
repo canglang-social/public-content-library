@@ -5,7 +5,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-import plistlib
 import subprocess
 import sys
 import uuid
@@ -16,7 +15,7 @@ from collector.backup import backup
 from collector.models import Artifact, Batch, Record
 from collector.runner import atomic_json, collect
 from collector.store import Store
-from ops.storage import StorageUnavailable, require_storage, runtime_environment, unavailable_result
+from ops.storage import StorageUnavailable, mac_volume_uuid, require_storage, runtime_environment, unavailable_result
 from ops.weekly_run import execute, write_json
 
 
@@ -49,8 +48,7 @@ def initialize(args):
             raise ValueError('Connect the expected drive and choose a new data directory on it; configuration must stay on the computer.')
         storage = {'mount_root': str(mount), 'root': str(root), 'storage_id': str(uuid.uuid4())}
         if sys.platform == 'darwin':
-            result = subprocess.run(['/usr/sbin/diskutil', 'info', '-plist', str(mount)], check=True, capture_output=True, timeout=15)
-            storage['volume_uuid'] = plistlib.loads(result.stdout)['VolumeUUID']
+            storage['volume_uuid'] = mac_volume_uuid(mount)
         config['storage'] = storage
     root.mkdir(parents=True, mode=0o700)
     home.mkdir(parents=True, mode=0o700)

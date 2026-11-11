@@ -3,7 +3,6 @@ import contextlib
 import io
 import json
 from pathlib import Path
-import plistlib
 import sys
 import tempfile
 import unittest
@@ -57,8 +56,18 @@ class ExternalStorage(unittest.TestCase):
 
     def test_different_disk_uuid_is_refused_even_with_copied_marker(self):
         self.config['storage']['volume_uuid'] = 'expected-uuid'
-        fake = Mock(stdout=plistlib.dumps({'VolumeUUID': 'other-uuid'}))
-        with patch.object(Path, 'is_mount', return_value=True), patch.object(storage.sys, 'platform', 'darwin'), patch.object(storage.subprocess, 'run', return_value=fake):
+        with patch.object(Path, 'is_mount', return_value=True), patch.object(storage.sys, 'platform', 'darwin'), patch.object(storage, 'mac_volume_uuid', return_value='other-uuid'):
+            with self.assertRaises(storage.StorageUnavailable):
+                storage.require_storage(self.config)
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'macOS filesystem metadata API')
+    def test_native_volume_identity_read_needs_no_disk_management_process(self):
+        import uuid
+        self.assertNotEqual(uuid.UUID(storage.mac_volume_uuid(Path('/'))).int, 0)
+
+    def test_unreadable_volume_identity_still_refuses_storage(self):
+        self.config['storage']['volume_uuid'] = 'expected-uuid'
+        with patch.object(Path, 'is_mount', return_value=True), patch.object(storage.sys, 'platform', 'darwin'), patch.object(storage, 'mac_volume_uuid', side_effect=OSError('unavailable')):
             with self.assertRaises(storage.StorageUnavailable):
                 storage.require_storage(self.config)
 

@@ -4,9 +4,36 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-import plistlib
-import subprocess
 import sys
+import uuid
+
+
+def mac_volume_uuid(mount):
+    """Read ATTR_VOL_UUID directly; background checks must not depend on diskutil IPC.
+
+    Layout and constants: macOS SDK sys/attr.h; the fixed result is a uint32
+    length followed by a 16-byte uuid_t. No mount or disk settings are changed.
+    """
+    import ctypes
+    class AttrList(ctypes.Structure):
+        _fields_ = [('bitmapcount', ctypes.c_uint16), ('reserved', ctypes.c_uint16),
+                    ('commonattr', ctypes.c_uint32), ('volattr', ctypes.c_uint32),
+                    ('dirattr', ctypes.c_uint32), ('fileattr', ctypes.c_uint32), ('forkattr', ctypes.c_uint32)]
+    library = ctypes.CDLL('/usr/lib/libSystem.B.dylib', use_errno=True)
+    function = library.getattrlist
+    function.argtypes = [ctypes.c_char_p, ctypes.POINTER(AttrList), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_ulong]
+    function.restype = ctypes.c_int
+    attributes = AttrList(5, 0, 0, 0x80000000 | 0x00040000, 0, 0, 0)
+    buffer = ctypes.create_string_buffer(20)
+    if function(os.fsencode(mount), ctypes.byref(attributes), buffer, len(buffer), 0) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error))
+    if int.from_bytes(buffer.raw[:4], sys.byteorder) != 20:
+        raise ValueError('The filesystem returned an incomplete volume identity.')
+    value = uuid.UUID(bytes=buffer.raw[4:20])
+    if value.int == 0:
+        raise ValueError('The filesystem returned an empty volume identity.')
+    return str(value)
 
 
 class StorageUnavailable(RuntimeError):
@@ -33,10 +60,8 @@ def require_storage(config):
         if sys.platform != 'darwin':
             raise StorageUnavailable('This volume-UUID check requires macOS; configure a supported mount guard for this system.')
         try:
-            result = subprocess.run(['/usr/sbin/diskutil', 'info', '-plist', str(mount)],
-                                    capture_output=True, timeout=15, check=True)
-            actual = plistlib.loads(result.stdout).get('VolumeUUID')
-        except (OSError, ValueError, subprocess.SubprocessError, plistlib.InvalidFileException) as exc:
+            actual = mac_volume_uuid(mount)
+        except (OSError, ValueError) as exc:
             raise StorageUnavailable('Unable to verify the configured volume identity.') from exc
         if not actual or str(actual).lower() != str(expected_uuid).lower():
             raise StorageUnavailable('A different external volume is mounted at the configured location.')
