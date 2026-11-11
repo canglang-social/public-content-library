@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "example-professional-blog",
+      "enabled": false,
+      "adapter": "rss",
+      "url": "https://example.org/feed.xml",
+      "review_status": "needs_review",
+      "tags": ["professional", "blog"],
+      "person_ids": []
+    },
+    {
+      "id": "example-article",
+      "enabled": false,
+      "adapter": "html_article",
+      "url": "https://example.org/research-note",
+      "review_status": "needs_review",
+      "tags": ["research"],
+      "person_ids": [],
+      "options": {"body_selectors": ["article"], "min_text_characters": 300}
+    }
+  ]
+}

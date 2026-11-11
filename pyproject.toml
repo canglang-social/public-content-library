@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "public-content-library"
+version = "0.1.0"
+description = "A local public-content collector with retained versions, search, bounded downloads, and verified backups"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+readme = "README.md"
+authors = [{name = "canglang-social"}]
+dependencies = ["beautifulsoup4==4.15.0", "requests==2.34.2"]
+
+[project.optional-dependencies]
+media = ["youtube-transcript-api==1.2.4", "yt-dlp==2026.10.26"]
+
+[project.scripts]
+pcl = "pcl:main"
+
+[tool.setuptools]
+package-dir = {"" = "library"}
+py-modules = ["pcl", "pdf_adapter"]
+
+[tool.setuptools.packages.find]
+where = ["library"]
+include = ["collector*", "media*", "bridge*", "ops*"]

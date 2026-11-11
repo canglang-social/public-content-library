@@ -1,0 +1,75 @@
+{
+  "member_root": {
+    "id": "1001",
+    "url": "https://x.com/example_member/status/1001",
+    "text": "Synthetic research note about a test system.",
+    "author": {
+      "screen_name": "example_member",
+      "name": "example_member"
+    },
+    "created_timestamp": 1700000000,
+    "created_at": "Tue Nov 14 22:13:20 +0000 2023"
+  },
+  "member_reply_v1": {
+    "id": "1002",
+    "url": "https://x.com/example_member/status/1002",
+    "text": "Synthetic follow-up that links to the research note.",
+    "author": {
+      "screen_name": "example_member",
+      "name": "example_member"
+    },
+    "created_timestamp": 1700000000,
+    "created_at": "Tue Nov 14 22:13:20 +0000 2023",
+    "replying_to": "example_member",
+    "replying_to_status": "1001"
+  },
+  "org_quote": {
+    "id": "2001",
+    "url": "https://x.com/ExampleLab/status/2001",
+    "text": "Synthetic organization post quoting an outside author.",
+    "author": {
+      "screen_name": "ExampleLab",
+      "name": "ExampleLab"
+    },
+    "created_timestamp": 1700000000,
+    "created_at": "Tue Nov 14 22:13:20 +0000 2023",
+    "quote": {
+      "id": "2002",
+      "url": "https://x.com/ExampleFoundation/status/2002",
+      "text": "Synthetic outside-author statement for attribution checks.",
+      "author": {
+        "screen_name": "ExampleFoundation",
+        "name": "ExampleFoundation"
+      },
+      "created_timestamp": 1700000000,
+      "created_at": "Tue Nov 14 22:13:20 +0000 2023"
+    }
+  },
+  "reply_v2": {
+    "id": "3002",
+    "url": "https://x.com/example_researcher/status/3002",
+    "text": "Synthetic reply using a second API response shape.",
+    "author": {
+      "screen_name": "example_researcher",
+      "name": "example_researcher"
+    },
+    "created_timestamp": 1700000000,
+    "created_at": "Tue Nov 14 22:13:20 +0000 2023",
+    "replying_to": {
+      "screen_name": "example_outsider",
+      "status": "3001",
+      "url": "https://x.com/example_outsider/status/3001"
+    }
+  },
+  "reply_parent_v2": {
+    "id": "3001",
+    "url": "https://x.com/example_outsider/status/3001",
+    "text": "Synthetic independent comment, not attributed to a registered person.",
+    "author": {
+      "screen_name": "example_outsider",
+      "name": "example_outsider"
+    },
+    "created_timestamp": 1700000000,
+    "created_at": "Tue Nov 14 22:13:20 +0000 2023"
+  }
+}
